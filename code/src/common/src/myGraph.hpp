@@ -58,19 +58,10 @@ public:
   void insert_data(const Edge *data_edges, int64_t count) {
   	int64_t vcount=0;
     for (unsigned int i = 0; i < count; ++i) {
+      //cout << data_edges[i].source << ", " << data_edges[i].target << endl;
   		graph_add_edge(data_edges[i]);
   	}
     calculateDegrees();
-    /*for ( int64_t i = 0; (unsigned int) i < V_id_map.size(); ++i )
-    {
-      graph[i].id = V_id_map.find(i)->second;
-      graph[i].contractions=0;
-    }*/
-      V_i vi;
-    for (vi = vertices(graph).first; vi != vertices(graph).second; ++vi) {
-          graph[(*vi)].id=vcount++;
-          graph[(*vi)].contractions=0;
-    }
   }
 
 
@@ -85,6 +76,8 @@ public:
   		id_V_map[edge.source]=  num_vertices;
   		V_id_map[num_vertices++] = edge.source;
   		vm_s = id_V_map.find(edge.source);
+      graph[vm_s->second].id=edge.source;
+      graph[vm_s->second].contractions=0;
   	}
 
   	vm_t = id_V_map.find(edge.target);
@@ -92,21 +85,24 @@ public:
   		id_V_map[edge.target]=  num_vertices;
   		V_id_map[num_vertices++] = edge.target;
   		vm_t = id_V_map.find(edge.target);
-  	}
+      graph[vm_t->second].id=edge.target;
+  	 graph[vm_t->second].contractions=0;
+    }
 
-  	if (edge.cost >= 0) {
+  	//if (edge.cost >= 0) {
   		boost::tie(e, inserted) =
   		boost::add_edge(vm_s->second, vm_t->second, graph);
   		graph[e].cost = edge.cost;
   		graph[e].id = edge.id;
-  	}
+      graph[e].type=edge.type;
+  	//}
 
-  	if (edge.revcost >= 0) {
+  	/*if (edge.revcost >= 0) {
   		boost::tie(e, inserted) =
   		boost::add_edge(vm_t->second, vm_s->second, graph);
   		graph[e].cost = edge.revcost;
   		graph[e].id = edge.id;
-  	}
+  	}*/
   }
 
 
@@ -123,6 +119,7 @@ public:
             d_edge.id = graph[*out].id;
             d_edge.source = graph[source(*out, graph)].id;
             d_edge.target = graph[target(*out, graph)].id;
+            //cout << "Removing " << d_edge.source << " " << d_edge.target << endl;
             d_edge.cost = graph[*out].cost;
             d_edge.revcost = -1;
             removed_edges.push_back(d_edge);
@@ -228,7 +225,7 @@ public:
         cout << it1->first << "-->" ;
         for (it2=it1->second.begin(); it2 !=it1->second.end(); ++it2)
         {
-           cout << *it2 << ", ";
+           cout << graph[(*it2)].id << ", ";
         }
         cout << endl;
       }
